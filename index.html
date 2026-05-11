@@ -52,7 +52,6 @@
         .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
         .kpi-card { background: var(--panel); padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: center; position: relative; word-wrap: break-word; overflow: hidden; }
         .kpi-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; font-weight: bold; }
-        /* Tamaño reducido para los valores principales */
         .kpi-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; }
         .kpi-sub { font-size: 0.8rem; color: #666; margin-top: 5px; }
         .pos { color: var(--green); } .neg { color: var(--red); }
@@ -273,11 +272,23 @@
         };
     }
 
-    function guardarDatosAuto() { localStorage.setItem('simuladorData_v27', JSON.stringify(obtenerDatosObjeto())); }
+    // Mejora: Try/Catch para evitar que la página se rompa si el Storage está bloqueado
+    function guardarDatosAuto() { 
+        try {
+            localStorage.setItem('simuladorData_v27', JSON.stringify(obtenerDatosObjeto())); 
+        } catch (e) {
+            console.warn("No se pudo guardar en Local Storage:", e);
+        }
+    }
+
     function cargarDatosAuto() {
-        const guardado = localStorage.getItem('simuladorData_v27') || localStorage.getItem('simuladorData_v26');
-        if (guardado) aplicarDatos(JSON.parse(guardado));
-        else initDates();
+        try {
+            const guardado = localStorage.getItem('simuladorData_v27') || localStorage.getItem('simuladorData_v26');
+            if (guardado) aplicarDatos(JSON.parse(guardado));
+            else initDates();
+        } catch (e) {
+            initDates();
+        }
         setTimeout(() => calcularSimulacion(false), 200);
     }
     
@@ -286,7 +297,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
         const a = document.createElement('a');
         a.href = dataStr;
-        a.download = "Acciones Argentinas" + data.ticker + ".json";
+        a.download = "Acciones Argentinas_" + data.ticker + ".json";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -655,10 +666,13 @@
         } catch(e) { }
     }
 
-    // Almacenamiento local para detectar cada pulsación en los inputs
+    // Mejora: Uso del evento 'input' para guardar al instante en vez de esperar a salir de la casilla
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatosAuto();
         document.querySelectorAll('input, select').forEach(elemento => {
+            // Guarda apenas escribes algo
+            elemento.addEventListener('input', () => calcularSimulacion(true));
+            // Mantenemos 'change' como respaldo para los calendarios y el select
             elemento.addEventListener('change', () => calcularSimulacion(true));
         });
     });
