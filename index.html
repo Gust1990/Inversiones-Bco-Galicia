@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanzador Pro - V27</title>
+    
+    <!-- Ícono para navegadores y atajos -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232979ff'><path d='M2 21h19v-2H2v2zm10-18L2 8h19L12 3zm-6 7h2v7H6v-7zm5 0h2v7h-2v-7zm5 0h2v7h-2v-7z'/></svg>">
+    
+    <!-- Ícono específico para la pantalla de inicio en celulares -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%23121212'/><path d='M2 21h19v-2H2v2zm10-18L2 8h19L12 3zm-6 7h2v7H6v-7zm5 0h2v7h-2v-7zm5 0h2v7h-2v-7z' fill='%232979ff'/></svg>">
+    
+    <!-- Modo aplicación a pantalla completa -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { 
@@ -642,7 +655,7 @@
         } catch(e) { }
     }
 
-    // Nuevo EventListener para que el almacenamiento local detecte cada pulsación en los inputs
+    // Almacenamiento local para detectar cada pulsación en los inputs
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatosAuto();
         document.querySelectorAll('input, select').forEach(elemento => {
