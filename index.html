@@ -39,7 +39,8 @@
         .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
         .kpi-card { background: var(--panel); padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: center; position: relative; word-wrap: break-word; overflow: hidden; }
         .kpi-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; font-weight: bold; }
-        .kpi-val { font-size: 1.4rem; font-weight: 800; margin-top: 5px; }
+        /* Tamaño reducido para los valores principales */
+        .kpi-val { font-size: 1.1rem; font-weight: 800; margin-top: 5px; }
         .kpi-sub { font-size: 0.8rem; color: #666; margin-top: 5px; }
         .pos { color: var(--green); } .neg { color: var(--red); }
         .card-inv { border: 1px solid #444; }
@@ -190,8 +191,7 @@
 
         <div class="projection-container" style="background: #1e1e1e; border-color: var(--orange);">
             <div class="proj-title" style="color: var(--orange);">Monitoreo de Opciones</div>
-            <div class="kpi-row" id="optionsMonitor">
-                </div>
+            <div class="kpi-row" id="optionsMonitor"></div>
         </div>
 
         <div class="projection-container">
@@ -642,8 +642,12 @@
         } catch(e) { }
     }
 
+    // Nuevo EventListener para que el almacenamiento local detecte cada pulsación en los inputs
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatosAuto();
+        document.querySelectorAll('input, select').forEach(elemento => {
+            elemento.addEventListener('change', () => calcularSimulacion(true));
+        });
     });
 </script>
 
