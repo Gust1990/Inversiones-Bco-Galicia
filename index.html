@@ -100,10 +100,10 @@
             </div>
             <div>
                 <label style="font-size:0.7rem; color:#888;">Precio Compra (PPC)</label>
-                <input type="number" id="avgPrice" value="7443">
+                <input type="number" id="avgPrice" value="7313">
             </div>
         </div>
-        <input type="number" id="stockQty" placeholder="Cantidad" value="4800">
+        <input type="number" id="stockQty" placeholder="Cantidad" value="5169">
         
         <button class="btn btn-fetch" id="btnFetch" onclick="fetchPrice()">Buscar precio</button>
 
@@ -153,7 +153,8 @@
         </div>
         <input type="number" id="putQty" placeholder="Lotes" value="0">
 
-        <button class="btn btn-calc" onclick="calcularSimulacion(true)">Proyectar</button>
+        <!-- Botón Proyectar ahora con ID para efecto visual y forzar guardado -->
+        <button class="btn btn-calc" id="btnProyectar" onclick="calcularSimulacion(true)">Proyectar y Guardar</button>
 
         <div class="backup-zone">
             <button class="btn btn-io" onclick="descargarBackup()">⬇️ Bajar .JSON</button>
@@ -272,7 +273,6 @@
         };
     }
 
-    // Mejora: Try/Catch para evitar que la página se rompa si el Storage está bloqueado
     function guardarDatosAuto() { 
         try {
             localStorage.setItem('simuladorData_v27', JSON.stringify(obtenerDatosObjeto())); 
@@ -283,7 +283,7 @@
 
     function cargarDatosAuto() {
         try {
-            const guardado = localStorage.getItem('simuladorData_v27') || localStorage.getItem('simuladorData_v26');
+            const guardado = localStorage.getItem('simuladorData_v27');
             if (guardado) aplicarDatos(JSON.parse(guardado));
             else initDates();
         } catch (e) {
@@ -366,7 +366,22 @@
     }
 
     function calcularSimulacion(guardar = true) {
-        if(guardar) guardarDatosAuto();
+        if(guardar) {
+            guardarDatosAuto();
+            // Feedback visual en el botón Proyectar
+            const btnP = document.getElementById('btnProyectar');
+            if(btnP) {
+                const textoOriginal = btnP.innerText;
+                btnP.innerHTML = "💾 ¡Guardado!";
+                btnP.style.background = "#00e676";
+                btnP.style.color = "#000";
+                setTimeout(() => { 
+                    btnP.innerHTML = "Proyectar y Guardar"; 
+                    btnP.style.background = "";
+                    btnP.style.color = "";
+                }, 1500);
+            }
+        }
 
         const fInicio = new Date(document.getElementById('fechaInicio').value);
         const fFin = new Date(document.getElementById('fechaFin').value);
@@ -666,15 +681,10 @@
         } catch(e) { }
     }
 
-    // Mejora: Uso del evento 'input' para guardar al instante en vez de esperar a salir de la casilla
+    // Removimos los eventos de guardado al teclear para evitar conflictos en celulares.
+    // Ahora el guardado depende explícitamente del botón "Proyectar y Guardar".
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatosAuto();
-        document.querySelectorAll('input, select').forEach(elemento => {
-            // Guarda apenas escribes algo
-            elemento.addEventListener('input', () => calcularSimulacion(true));
-            // Mantenemos 'change' como respaldo para los calendarios y el select
-            elemento.addEventListener('change', () => calcularSimulacion(true));
-        });
     });
 </script>
 
