@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lanzador Pro - V27</title>
+    <title>Lanzador Pro - V28</title>
     
     <!-- Ícono para navegadores y atajos -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232979ff'><path d='M2 21h19v-2H2v2zm10-18L2 8h19L12 3zm-6 7h2v7H6v-7zm5 0h2v7h-2v-7zm5 0h2v7h-2v-7z'/></svg>">
@@ -83,7 +83,7 @@
         <h1 class="app-title">Acciones argentinas</h1>
 
         <h3>1. Configuración Activo</h3>
-        <select id="ticker">
+        <select id="ticker" onchange="cambiarTicker()">
             <option value="GGAL.BA" selected>Grupo Financiero Galicia (GGAL)</option>
             <option value="BMA.BA">Banco Macro (BMA)</option>
             <option value="BBAR.BA">BBVA Argentina (BBAR)</option>
@@ -132,6 +132,10 @@
             </div>
         </div>
 
+        <!-- Nuevo input para Costo de Rolleo -->
+        <div class="section-title" style="color:var(--red);">Costo de Recompra (Rolo)</div>
+        <input type="number" id="costoRecompra" placeholder="Costo total para cerrar posición ($)" value="0">
+
         <div class="section-title" style="color:var(--orange);">Call lanzado #1</div>
         <div class="row-2">
             <input type="number" id="callStrike" placeholder="Strike" value="6775">
@@ -153,7 +157,6 @@
         </div>
         <input type="number" id="putQty" placeholder="Lotes" value="0">
 
-        <!-- Botón Proyectar ahora con ID para efecto visual y forzar guardado -->
         <button class="btn btn-calc" id="btnProyectar" onclick="calcularSimulacion(true)">Proyectar y Guardar</button>
 
         <div class="backup-zone">
@@ -235,6 +238,7 @@
 
 <script>
     let myChart = null;
+    const STORAGE_KEY = 'lanzadorPro_db_v28'; // Nueva clave para la base de datos de tickers
     const fmt = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
     const fmtShort = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0, notation: "compact" }).format(n);
     const COMISION = 0.01; 
@@ -243,6 +247,10 @@
     function safeClassName(id, className) { const el = document.getElementById(id); if (el) el.className = className; }
     function safeGetValue(id) { const el = document.getElementById(id); return el ? (parseFloat(el.value) || 0) : 0; }
     function safeSetValue(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+    function limpiarFormulario() {
+        ['stockPrice', 'avgPrice', 'stockQty', 'costoRecompra', 'callStrike', 'callPrem', 'callQty', 'callStrike2', 'callPrem2', 'callQty2', 'putStrike', 'putPrem', 'putQty'].forEach(id => safeSetValue(id, ''));
+        safeSetValue('costoRecompra', 0);
+    }
 
     function initDates() {
         const today = new Date();
@@ -258,6 +266,7 @@
             stockPrice: document.getElementById('stockPrice').value,
             avgPrice: document.getElementById('avgPrice').value,
             stockQty: document.getElementById('stockQty').value,
+            costoRecompra: document.getElementById('costoRecompra').value,
             callStrike: document.getElementById('callStrike').value,
             callPrem: document.getElementById('callPrem').value,
             callQty: document.getElementById('callQty').value,
@@ -273,9 +282,13 @@
         };
     }
 
+    // Funciones de DB Mejoradas
     function guardarDatosAuto() { 
         try {
-            localStorage.setItem('simuladorData_v27', JSON.stringify(obtenerDatosObjeto())); 
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            const tickerActual = document.getElementById('ticker').value;
+            db[tickerActual] = obtenerDatosObjeto();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); 
         } catch (e) {
             console.warn("No se pudo guardar en Local Storage:", e);
         }
@@ -283,13 +296,22 @@
 
     function cargarDatosAuto() {
         try {
-            const guardado = localStorage.getItem('simuladorData_v27');
-            if (guardado) aplicarDatos(JSON.parse(guardado));
-            else initDates();
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            const tickerActual = document.getElementById('ticker').value;
+            if (db[tickerActual]) {
+                aplicarDatos(db[tickerActual]);
+            } else {
+                limpiarFormulario();
+                initDates();
+            }
         } catch (e) {
             initDates();
         }
         setTimeout(() => calcularSimulacion(false), 200);
+    }
+
+    function cambiarTicker() {
+        cargarDatosAuto();
     }
     
     function descargarBackup() {
@@ -308,7 +330,13 @@
         if(!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
-            try { aplicarDatos(JSON.parse(e.target.result)); calcularSimulacion(true); alert("✅ Restaurado."); } 
+            try { 
+                const data = JSON.parse(e.target.result);
+                if (data.ticker) document.getElementById('ticker').value = data.ticker;
+                aplicarDatos(data); 
+                calcularSimulacion(true); 
+                alert("✅ Restaurado."); 
+            } 
             catch(err) { alert("❌ Error archivo."); }
         };
         reader.readAsText(file);
@@ -319,6 +347,7 @@
         if(d.stockPrice) safeSetValue('stockPrice', d.stockPrice);
         if(d.avgPrice) safeSetValue('avgPrice', d.avgPrice);
         if(d.stockQty) safeSetValue('stockQty', d.stockQty);
+        if(d.costoRecompra !== undefined) safeSetValue('costoRecompra', d.costoRecompra);
         if(d.callStrike) safeSetValue('callStrike', d.callStrike);
         if(d.callPrem) safeSetValue('callPrem', d.callPrem);
         if(d.callQty) safeSetValue('callQty', d.callQty);
@@ -368,7 +397,6 @@
     function calcularSimulacion(guardar = true) {
         if(guardar) {
             guardarDatosAuto();
-            // Feedback visual en el botón Proyectar
             const btnP = document.getElementById('btnProyectar');
             if(btnP) {
                 const textoOriginal = btnP.innerText;
@@ -393,6 +421,8 @@
         const Q_Stock = safeGetValue('stockQty');
         if (!PPC || PPC === 0) PPC = S_Market;
 
+        const costoRecompra = safeGetValue('costoRecompra');
+
         const K_Call = safeGetValue('callStrike');
         const P_Call = safeGetValue('callPrem');
         const Q_Call_Input = safeGetValue('callQty');
@@ -413,7 +443,9 @@
         const ingresoPrimas2 = (P_Call2 * Q_Call2) * (1 - COMISION);
         const egresoPrimas = (P_Put * Q_Put) * (1 + COMISION);
         
-        const flujoNetoPrimas = (ingresoPrimas1 + ingresoPrimas2) - egresoPrimas;
+        // Ajuste con el Costo de Rolleo
+        const flujoNetoPrimas = (ingresoPrimas1 + ingresoPrimas2) - egresoPrimas - costoRecompra;
+        
         const inversionBase = PPC * Q_Stock;
         const inversionReal = inversionBase - flujoNetoPrimas;
 
@@ -650,39 +682,39 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        legend: { display: false },
-                        tooltips: { 
-                            mode: 'index', 
-                            intersect: false,
-                            titleFontSize: 14,
-                            bodyFontSize: 14
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { 
+                                mode: 'index', 
+                                intersect: false,
+                                titleFont: { size: 14 },
+                                bodyFont: { size: 14 }
+                            }
                         },
                         scales: {
-                            xAxes: [{ 
-                                gridLines: { display: false }, 
-                                ticks: { fontColor: '#aaa', fontSize: 14, padding: 10 } 
-                            }],
-                            yAxes: [{ 
-                                gridLines: { color: '#333' }, 
+                            x: { 
+                                grid: { display: false }, 
+                                ticks: { color: '#aaa', font: { size: 14 }, padding: 10 } 
+                            },
+                            y: { 
+                                grid: { color: '#333' }, 
                                 ticks: { 
-                                    fontColor: '#aaa', 
-                                    fontSize: 14, 
+                                    color: '#aaa', 
+                                    font: { size: 14 }, 
                                     padding: 10,
-                                    callback: function(value, index, values) {
+                                    callback: function(value) {
                                         return new Intl.NumberFormat('es-AR', { notation: "compact" }).format(value);
                                     }
                                 } 
-                            }]
+                            }
                         }
                     },
                     plugins: [customLinesPlugin]
                 });
             }
-        } catch(e) { }
+        } catch(e) { console.error("Error Chart:", e) }
     }
 
-    // Removimos los eventos de guardado al teclear para evitar conflictos en celulares.
-    // Ahora el guardado depende explícitamente del botón "Proyectar y Guardar".
     document.addEventListener("DOMContentLoaded", () => {
         cargarDatosAuto();
     });
