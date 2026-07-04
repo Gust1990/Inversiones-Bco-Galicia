@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lanzador Pro - V28</title>
+    <title>Lanzador Pro - V29</title>
     
     <!-- Ícono para navegadores y atajos -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232979ff'><path d='M2 21h19v-2H2v2zm10-18L2 8h19L12 3zm-6 7h2v7H6v-7zm5 0h2v7h-2v-7zm5 0h2v7h-2v-7z'/></svg>">
@@ -103,7 +103,7 @@
                 <input type="number" id="avgPrice" value="7313">
             </div>
         </div>
-        <input type="number" id="stockQty" placeholder="Cantidad" value="5169">
+        <input type="number" id="stockQty" placeholder="Cantidad" value="5170">
         
         <button class="btn btn-fetch" id="btnFetch" onclick="fetchPrice()">Buscar precio</button>
 
@@ -343,23 +343,23 @@
     }
 
     function aplicarDatos(d) {
-        if(d.ticker) document.getElementById('ticker').value = d.ticker;
-        if(d.stockPrice) safeSetValue('stockPrice', d.stockPrice);
-        if(d.avgPrice) safeSetValue('avgPrice', d.avgPrice);
-        if(d.stockQty) safeSetValue('stockQty', d.stockQty);
+        if(d.ticker !== undefined) document.getElementById('ticker').value = d.ticker;
+        if(d.stockPrice !== undefined) safeSetValue('stockPrice', d.stockPrice);
+        if(d.avgPrice !== undefined) safeSetValue('avgPrice', d.avgPrice);
+        if(d.stockQty !== undefined) safeSetValue('stockQty', d.stockQty);
         if(d.costoRecompra !== undefined) safeSetValue('costoRecompra', d.costoRecompra);
-        if(d.callStrike) safeSetValue('callStrike', d.callStrike);
-        if(d.callPrem) safeSetValue('callPrem', d.callPrem);
-        if(d.callQty) safeSetValue('callQty', d.callQty);
-        if(d.callStrike2) safeSetValue('callStrike2', d.callStrike2);
-        if(d.callPrem2) safeSetValue('callPrem2', d.callPrem2);
-        if(d.callQty2) safeSetValue('callQty2', d.callQty2);
-        if(d.putStrike) safeSetValue('putStrike', d.putStrike);
-        if(d.putPrem) safeSetValue('putPrem', d.putPrem);
-        if(d.putQty) safeSetValue('putQty', d.putQty);
-        if(d.fechaInicio) document.getElementById('fechaInicio').value = d.fechaInicio;
-        if(d.fechaFin) document.getElementById('fechaFin').value = d.fechaFin;
-        if(d.bnaRate) document.getElementById('bnaRate').value = d.bnaRate;
+        if(d.callStrike !== undefined) safeSetValue('callStrike', d.callStrike);
+        if(d.callPrem !== undefined) safeSetValue('callPrem', d.callPrem);
+        if(d.callQty !== undefined) safeSetValue('callQty', d.callQty);
+        if(d.callStrike2 !== undefined) safeSetValue('callStrike2', d.callStrike2);
+        if(d.callPrem2 !== undefined) safeSetValue('callPrem2', d.callPrem2);
+        if(d.callQty2 !== undefined) safeSetValue('callQty2', d.callQty2);
+        if(d.putStrike !== undefined) safeSetValue('putStrike', d.putStrike);
+        if(d.putPrem !== undefined) safeSetValue('putPrem', d.putPrem);
+        if(d.putQty !== undefined) safeSetValue('putQty', d.putQty);
+        if(d.fechaInicio !== undefined) document.getElementById('fechaInicio').value = d.fechaInicio;
+        if(d.fechaFin !== undefined) document.getElementById('fechaFin').value = d.fechaFin;
+        if(d.bnaRate !== undefined) document.getElementById('bnaRate').value = d.bnaRate;
     }
 
     async function fetchPrice() {
