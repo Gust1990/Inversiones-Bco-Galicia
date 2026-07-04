@@ -138,17 +138,17 @@
 
         <div class="section-title" style="color:var(--orange);">Call lanzado #1</div>
         <div class="row-2">
-            <input type="number" id="callStrike" placeholder="Strike" value="6775">
-            <input type="number" id="callPrem" placeholder="Prima ($)" value="577">
+            <input type="number" id="callStrike" placeholder="Strike">
+            <input type="number" id="callPrem" placeholder="Prima ($)">
         </div>
-        <input type="number" id="callQty" placeholder="Lotes #1" value="18">
+        <input type="number" id="callQty" placeholder="Lotes #1">
 
         <div class="section-title" style="color:#ff9100;">Call lanzado #2</div>
         <div class="row-2">
-            <input type="number" id="callStrike2" placeholder="Strike #2" value="7000">
-            <input type="number" id="callPrem2" placeholder="Prima #2 ($)" value="435">
+            <input type="number" id="callStrike2" placeholder="Strike #2">
+            <input type="number" id="callPrem2" placeholder="Prima #2 ($)">
         </div>
-        <input type="number" id="callQty2" placeholder="Lotes #2" value="30">
+        <input type="number" id="callQty2" placeholder="Lotes #2">
 
         <div class="section-title" style="color:var(--green);">Put comprado</div>
         <div class="row-2">
@@ -238,7 +238,7 @@
 
 <script>
     let myChart = null;
-    const STORAGE_KEY = 'lanzadorPro_db_v28'; // Nueva clave para la base de datos de tickers
+    const STORAGE_KEY = 'lanzadorPro_db_v29'; // Base de datos limpia
     const fmt = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n);
     const fmtShort = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0, notation: "compact" }).format(n);
     const COMISION = 0.01; 
@@ -282,7 +282,6 @@
         };
     }
 
-    // Funciones de DB Mejoradas
     function guardarDatosAuto() { 
         try {
             let db = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -302,6 +301,8 @@
                 aplicarDatos(db[tickerActual]);
             } else {
                 limpiarFormulario();
+                // Dejamos la cantidad inicial por defecto en 5170 si está limpio
+                safeSetValue('stockQty', '5170');
                 initDates();
             }
         } catch (e) {
